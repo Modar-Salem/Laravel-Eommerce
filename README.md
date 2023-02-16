@@ -29,7 +29,7 @@ Next make sure to create a new database and add your database credentials to you
 
 ```
 DB_HOST=127.0.0.1
-DB_DATABASE=consulting_services
+DB_DATABASE=store
 DB_USERNAME=root
 DB_PASSWORD=
 
