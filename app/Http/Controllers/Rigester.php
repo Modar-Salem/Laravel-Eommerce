@@ -11,33 +11,7 @@ use Illuminate\Support\Facades\Validator;
 
 class Rigester extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function index()
-    {
-        try
-        {
-
-            $User = User::all();
-
-            return response()->json([
-                'Status' => 'True',
-                'Users' => $User,
-            ], 201);
-
-        }
-        catch (\Throwable $Th)
-        {
-            return response()->json([
-                'Status' => false,
-                'Message' => $Th->getMessage(),
-            ], 500);
-        }
-
-    }
+    
 
     /**
      * SignUp And store a newly created resource in storage.
