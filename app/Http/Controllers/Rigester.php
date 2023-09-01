@@ -21,40 +21,27 @@ class Rigester extends Controller
      */
     public function SignUp(Request $request)
     {
-        //validate from Request-Error
         try
         {
 
                 $validate = Validator::make($request->all() , [
-                    'name' => 'required | string | min:5 | max :34',
-
-                    'phone' => 'required | string | numeric ',
-
-                    'email' => 'required | email ',
-
-                    'role' => 'boolean'
-
-
+                    'name' => 'required|string|max:255',
+                
+                    'email' => 'required|string|email|max:255|unique:users',
+                
+                    'password' => 'required|string|min:8|confirmed',
+                
+                    'phone' => 'required|string|min:10|max:20',
                 ])  ;
 
                 if ($validate->fails())
                     return response()->json([
-                        'Status' => false ,
-                        'Validation Error' => $validate->errors()
+                        'status' => false ,
+                        'validation error' => $validate->errors()
                     ],401) ;
 
-        }
-        catch (\Throwable $Th)
-        {
-                return response()->json([
-                    'Status'=>false ,
-                    'Error In Create User' => $Th->getMessage()
-                ],500) ;
-        }
+                //create user AND create token
 
-        //create user AND create token
-        try
-        {
                 $User = User::create([
                     'name' => $request['name'],
 
@@ -62,40 +49,25 @@ class Rigester extends Controller
 
                     'password' => \Illuminate\Support\Facades\Hash::make($request['password']),
 
-                    'role' => 'Admin' ,
-
                     'phone' => $request['phone']
                 ]) ;
 
-                //create Token
-                try
-                {
-                          $token = $User->createToken('API TOKEN')->plainTextToken ;
-                }
-                catch (\Throwable $Th)
-                {
-                         return response() -> json([
-                                'Status' => false  ,
-                                'Error in Create the Token' => $Th->getMessage() ,
-                         ] ,  500) ;
-                }
+                $token = $User->createToken('API TOKEN')->plainTextToken ;
+                //Success
+                return response() -> json([
+                    'status' => true ,
+                    'user' => $User ,
+                    'token' => $token
+                ], 201) ;
 
-
-        }
-        catch (\Throwable $Th)
+        }catch (\Throwable $Th)
         {
                 return response() -> json([
-                    'Status' => false  ,
-                    'Error in Create the User' => $Th->getMessage() ,
+                    'status' => false  ,
+                    'message' => $Th->getMessage() ,
                 ] ,  500) ;
         }
 
-        //Success
-        return response() -> json([
-            'Status' => true ,
-            'User' => $User ,
-            'Token' => $token
-        ], 201) ;
 
     }
 
@@ -105,67 +77,67 @@ class Rigester extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function LogIn(Request $request) {
+    public function LogIn(Request $request) 
+    {
          try
          {
-            if (!Auth::attempt($request->only('email' , 'password' ))){
-                    return response()->json([
-                        'Status' => false ,
-                        'Message' => 'Invalid Data'
-                    ]);
-            }
+            //Normal Email
+            $credentials = $request->only('email', 'password');
+            if (!Auth::attempt($credentials))
+                return response()->json([
+                    'status' => false ,
+                    'message' => 'Invalid Data'
+                ]);
             else
             {
 
-                $User = User::where('email' , $request['email'])->first() ;
+                $User = \App\Models\User::where('email' , $request['email'])->first() ;
                 $token = $User->createToken('API TOKEN')->plainTextToken ;
 
                 return response() ->json([
-                    'Status'=> true ,
-                    'Token' => $token ,
-                ], 201) ;
-
+                    'status'=> true ,
+                    'user' => $User,
+                    'token' => $token ,
+                ]) ;
             }
 
          }
          catch (\Throwable $Th)
          {
              return response()->json([
-                 'Status' => false ,
-                 'Message' => $Th->getMessage()
+                 'status' => false ,
+                 'message' => $Th->getMessage()
              ],500) ;
          }
     }
 
+    
     /**
      * Logout .
      *
-     * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\JsonResponse
      */
     public function LogOut()
     {
-            try
-            {
+        try
+        {
+            Auth::user()->tokens()->delete();
 
-                Auth::user()->tokens->each(function ($token){
-                        $token->delete() ;
-                        return response()->json([
-                            'Status' => true ,
-                            'Message' => 'LogOut Successfully'
-                        ]) ;
-                }) ;
+            return  response()->json([
+                "status" => true ,
+                "message" => "LogOut Successfully"
+            ] ) ;
 
-            }
-            catch(\Exception $exception)
-            {
-                    return response()->json([
-                        'Status' => false ,
-                        'Message' => $exception->getMessage()
-                    ]);
-            }
+        }catch(\Exception $exception)
+        {
+            return response()->json([
+                'status' => false ,
+                'message' => $exception->getMessage()
+            ]);
+        }
 
     }
+
 
 
     /**
@@ -179,16 +151,6 @@ class Rigester extends Controller
         //
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function edit($id)
-    {
-        //
-    }
 
     /**
      * Update the specified resource in storage.
@@ -208,21 +170,21 @@ class Rigester extends Controller
                 if ($id == Auth::id() or \auth()->user()->role = 'Admin') {
                     $user->update($request->all());
                     return response()->json([
-                        'Status' => true,
-                        'Message' => 'User has been Updated Successfully'
+                        'status' => true,
+                        'message' => 'User has been Updated Successfully'
                     ]);
                 }
                 else
                     return response()->json([
-                        'Status' => false,
-                        'Message' => 'InValid Request'
+                        'status' => false,
+                        'message' => 'InValid Request'
                     ]);
             }
             else
             {
                 return response()->json([
-                    'Status'=>false ,
-                    'Message' => 'User Not found'
+                    'status'=>false ,
+                    'message' => 'User Not found'
                 ]) ;
             }
 
@@ -230,8 +192,8 @@ class Rigester extends Controller
         catch (\Exception $exception)
         {
             return response()->json([
-                'Status' => false,
-                'Message' => $exception->getMessage()
+                'status' => false,
+                'message' => $exception->getMessage()
             ]);
         }
     }
@@ -257,29 +219,24 @@ class Rigester extends Controller
                                 $this->LogOut() ;
 
                                 return response()->json([
-                                    'Status' => true,
-                                    'Message' => 'User has been deleted successfully'
+                                    'status' => true,
+                                    'message' => 'User has been deleted successfully'
                                 ]);
                         }else
                         {
                             return response()->json([
-                                'Status' => false ,
-                                'Message' => 'User Not Found'
+                                'status' => false ,
+                                'message' => 'User Not Found'
                                 ]);
                         }
 
                 }
-                else
-                {
-
-                 }
-
         }
         catch (\Exception $exception)
         {
             return  response()->json([
-                'Status' => false ,
-                'Message' => $exception->getMessage()
+                'status' => false ,
+                'message' => $exception->getMessage()
             ]) ;
         }
     }

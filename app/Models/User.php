@@ -34,7 +34,7 @@ class User extends Authenticatable implements MustVerifyEmail
 // variable hidden don't return when we return user data
     protected $hidden = [
         'remember_token' ,
-
+        'password'
     ];
 
     protected $casts = [

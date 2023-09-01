@@ -14,7 +14,7 @@ Route::prefix('Store')->group(function () {
     Route::middleware('auth:sanctum')
         ->group(function ()
         {
-            Route::Post('LogOut' , [\App\Http\Controllers\Rigester::class , 'LogOut'])->name('LogOut') ;
+            Route::get('LogOut' , [\App\Http\Controllers\Rigester::class , 'LogOut'])->name('LogOut') ;
 
             Route::put('Update/{id}' , [\App\Http\Controllers\Rigester::class , 'update' ])->name('Update') ;
 
