@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Category;
 use App\Models\pending_sub_categories;
 use App\Models\Sub_categories;
 use Illuminate\Http\Request;
@@ -11,6 +12,29 @@ use function League\Uri\validate;
 
 class Sub_category extends Controller
 {
+    public function Get_pending_sub_category(Request $request)
+    {
+        try
+        {
+            $pendings = pending_sub_categories::all() ;
+
+            foreach ($pendings as $pending)
+            {
+                $pending->catigory_name = Category::find($pending->category_id) ;
+            }
+
+            return  response()->json([
+                'status' => true ,
+                'pending_sub_category' => $pendings
+                    ]) ;
+        }catch (\Exception $ex)
+        {
+            return response()->json([
+                'Status' => false,
+                'Error' => $ex->getMessage()
+            ], 500);
+        }
+    }
     public function Add_sub_category(Request $request): \Illuminate\Http\JsonResponse
     {
 
@@ -41,8 +65,9 @@ class Sub_category extends Controller
         }
         try
         {
+            //if not exist in pending_sub_categories or sub_categories
             $pending_sub_categories_Exist = pending_sub_categories::where('name' , $request['name'])->where('category_id' , $request['category_id']  ) ;
-            $sub_categories_Exist = Sub_categories::where('name' , $request['name']) -> where('category_id', $request['category_id']) ;
+            $sub_categories_Exist = Sub_categories::where('name' , $request['name'])->where('category_id', $request['category_id']) ;
 
             if(! ($pending_sub_categories_Exist->first() or $sub_categories_Exist->first()))
             {

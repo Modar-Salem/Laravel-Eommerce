@@ -28,6 +28,8 @@ return new class extends Migration
 
             $table->foreignId('subcategory_id')->nullable()->constrained('sub_categories')->onDelete('cascade');
 
+            $table->foreignId('category_id') ;
+
             $table->timestamps();
         });
     }

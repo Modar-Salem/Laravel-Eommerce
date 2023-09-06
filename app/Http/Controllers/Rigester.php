@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Validator;
 
 class Rigester extends Controller
 {
-    
+
 
     /**
      * SignUp And store a newly created resource in storage.
@@ -26,11 +26,11 @@ class Rigester extends Controller
 
                 $validate = Validator::make($request->all() , [
                     'name' => 'required|string|max:255',
-                
+
                     'email' => 'required|string|email|max:255|unique:users',
-                
+
                     'password' => 'required|string|min:8|confirmed',
-                
+
                     'phone' => 'required|string|min:10|max:20',
                 ])  ;
 
@@ -38,7 +38,7 @@ class Rigester extends Controller
                     return response()->json([
                         'status' => false ,
                         'validation error' => $validate->errors()
-                    ],401) ;
+                    ]) ;
 
                 //create user AND create token
 
@@ -77,7 +77,7 @@ class Rigester extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function LogIn(Request $request) 
+    public function LogIn(Request $request)
     {
          try
          {
@@ -111,7 +111,7 @@ class Rigester extends Controller
          }
     }
 
-    
+
     /**
      * Logout .
      *

@@ -27,42 +27,29 @@ class Product extends Controller
 
                 if ($user)
                 {
-                        if (Auth::id() == $user_id or \auth()->user()->role == 'Admin')
+                        $products = \App\Models\Product::where('user_id', $user_id);
+
+                        if ($products->first())
                         {
-                            $products = \App\Models\Product::where('user_id', $user_id);
-
-                            if ($products->first())
-                            {
-                                return response()->json([
-                                    'Status' => true ,
-                                    'Products' => \App\Models\Product::where('user_id', $user_id) ->get()
-                                ]) ;
-                            }
-
-                            else
-                            {
-                                return response()->json([
-                                    'Status' => false ,
-                                    'Products' => 'This  User haven\'t Product  '
-                                ]) ;
-                            }
-
-
+                            return response()->json([
+                                'Status' => true ,
+                                'Products' => \App\Models\Product::where('user_id', $user_id) ->get()
+                            ]) ;
                         }
+
                         else
                         {
                             return response()->json([
                                 'Status' => false ,
-                                'Message' => 'Invalid Request'
+                                'Products' => 'This  User haven\'t Product  '
                             ]) ;
                         }
-
                 }
                 else
                 {
                     return response()->json([
                         'Status' => false ,
-                        'Message' => "User Not Found"
+                        'Message' => "User Not Exist"
                     ]) ;
                 }
 
@@ -105,7 +92,9 @@ class Product extends Controller
 
                     'details' => 'string ',
 
-                    'subcategory_id' => 'exists:sub_categories,id | string '
+                    'subcategory_id' => 'exists:sub_categories,id' ,
+
+                    'category_id' =>'exists:categories,id'
 
                 ]);
             }
@@ -126,13 +115,13 @@ class Product extends Controller
 
                         'amount' => $request['amount'] ,
 
-
-
                         'price' => $request ['price'],
 
                         'details' =>$request ['details'] ,
 
                         'user_id' => $id ,
+
+                        'category_id' => $request ['category_id'] ,
 
                         'subcategory_id' => $request ['subcategory_id'] ,
 
@@ -196,13 +185,18 @@ class Product extends Controller
         try
         {
 
-            $product = null ;
+            $product = \App\Models\Product::query() ;
             if ($request['name'] != null)
-                    $product = \App\Models\Product::where('name' ,'like' ,'%'.$request['name'].'%')->orWhere('details' ,'like' ,'%'.$request['name'].'%') ;
+                    $product = $product->where('name' ,'like' ,'%'.$request['name'].'%')->orWhere('details' ,'like' ,'%'.$request['name'].'%') ;
 
             if ($request['price']!=null)
                     $product = $product->where('price' , '>' , $request['price']) ;
 
+            if($request['category_id']!=null)
+            {
+                $product = $product->where('category_id' , $request['category_id']) ;
+
+            }
             if ($request['subcategory_id']!=null)
                     $product = $product->where('subcategory_id' , $request['subcategory_id']) ;
 
@@ -341,8 +335,6 @@ class Product extends Controller
 
             if ($product)
             {
-                if (Auth::id()==$product->user_id or \auth()->user()->role == 'Admin')
-                {
 
                     $product_image = \App\Models\Image::where('product_id' , $product_id) ;
                     $product_image->delete() ;
@@ -353,7 +345,7 @@ class Product extends Controller
                         'Status' => true ,
                         'Message' => 'Record has been Deleted Successfully'
                     ]) ;
-                }
+
             }
             else
             {

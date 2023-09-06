@@ -9,10 +9,11 @@ Route::post('Add' , [\App\Http\Controllers\Product::class ,'store' ]) ;
 
 Route::post('SearchProduct' , [\App\Http\Controllers\Product::class , 'show']) ;
 
-Route::Get('GetMyProduct/{user_id}' , [\App\Http\Controllers\Product::class ,'index']  ) ;
-
 
 Route::middleware('HaveThisProduct')->group(function (){
+
+
+    Route::Get('GetMyProduct/{user_id}' , [\App\Http\Controllers\Product::class ,'index']  ) ;
 
     Route::put('EditMyProduct/{product_id}' , [\App\Http\Controllers\Product::class , 'update']) ;
 
@@ -20,11 +21,16 @@ Route::middleware('HaveThisProduct')->group(function (){
 
 });
 
+
 Route::prefix('Subcategory')->group(function(){
+
+    Route::get('GetPending', [\App\Http\Controllers\Sub_category::class , 'Get_pending_sub_category']) ;
 
     Route::post('Add', [\App\Http\Controllers\Sub_category::class , 'Add_sub_category']) ;
 
     Route::post('Confirm/{pending_sub_categories_id}' , [\App\Http\Controllers\Sub_category::class , 'Confirm_sub_category']) ;
+
+    Route::post('Deny/{pending_sub_categories_id}' , [\App\Http\Controllers\Sub_category::class , 'Deny_sub_category']) ;
 
 });
 
@@ -66,6 +72,5 @@ Route::prefix('Purchase')->group(function (){
     Route::get('Get_More_Popular' ,[\App\Http\Controllers\Purchase::class , 'Get_More_Popular'] ) ;
 
     Route::post('Buy' ,[\App\Http\Controllers\Purchase::class , 'store'] ) ;
-
 
 });
